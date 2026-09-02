@@ -13,9 +13,12 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Saudi Site Visit</p>
-        <h1>Installation Scoreboard</h1>
+      <div class="brand-block">
+        <img class="company-logo" src="{{ url_for('static', filename='company-logo.png') }}" alt="Company logo" width="52" height="52">
+        <div>
+          <p class="eyebrow">Saudi Site Visit</p>
+          <h1>Installation Scoreboard</h1>
+        </div>
       </div>
       <div class="topbar-actions">
         <div class="user-credential" aria-label="Current user Eddie C">
@@ -71,7 +74,7 @@
           <h2>Skylight Installation Performance</h2>
         </div>
         <div class="schedule-controls" aria-label="Project schedule settings">
-          <label>Project start<input id="project-start" type="date"></label>
+          <label>Project start<input id="project-start" type="date" readonly title="Automatically set from the earliest installation date"></label>
           <label>Planned days<input id="planned-days" type="number" min="1" max="365" step="1" value="50"></label>
         </div>
       </section>

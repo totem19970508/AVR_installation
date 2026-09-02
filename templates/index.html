@@ -12,9 +12,12 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Saudi Site Visit</p>
-        <h1>Skylight Installation Control</h1>
+      <div class="brand-block">
+        <img class="company-logo" src="{{ url_for('static', filename='company-logo.png') }}" alt="Company logo" width="52" height="52">
+        <div>
+          <p class="eyebrow">Saudi Site Visit</p>
+          <h1>Skylight Installation Control</h1>
+        </div>
       </div>
       <div class="topbar-actions">
         <div class="user-credential" aria-label="Current user Eddie C">
@@ -37,7 +40,7 @@
     </header>
 
     <main>
-      <section class="filter-band" aria-label="Installation filters">
+      <section class="filter-band" id="installation-filters" aria-label="Installation filters">
         <div class="filter-group direction-filter">
           <div class="filter-heading">
             <div class="heading-label"><span>01</span><h2>Direction</h2></div>
@@ -61,7 +64,7 @@
         </div>
       </section>
 
-      <section class="summary-band" aria-label="Filtered installation summary">
+      <section class="summary-band" id="installation-summary" aria-label="Filtered installation summary">
         <div class="metric metric-2000">
           <span>2000 mm X-bars</span>
           <div class="metric-equation"><b id="metric-2000-total">0</b><small>Total</small><i>−</i><b id="metric-2000-installed">0</b><small>Installed</small><i>=</i><b id="metric-2000-remaining">0</b><small>Remaining</small></div>
@@ -86,11 +89,16 @@
             <div class="heading-label"><span>03</span><h2>Installation Register</h2></div>
             <p id="result-count">Loading records...</p>
           </div>
-          <label class="search-field">
-            <i data-lucide="search" aria-hidden="true"></i>
-            <span class="sr-only">Search plan number or position</span>
-            <input id="search-input" type="search" placeholder="Search plan or position" autocomplete="off">
-          </label>
+          <div class="results-actions">
+            <button class="rollup-button" id="controls-toggle" type="button" aria-expanded="true" aria-controls="installation-filters installation-summary">
+              <i data-lucide="panel-top-close" aria-hidden="true"></i><span>Roll up</span>
+            </button>
+            <label class="search-field">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <span class="sr-only">Search plan number or position</span>
+              <input id="search-input" type="search" placeholder="Search plan or position" autocomplete="off">
+            </label>
+          </div>
         </div>
 
         <div class="table-shell">

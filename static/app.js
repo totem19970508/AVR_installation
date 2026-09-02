@@ -2,6 +2,7 @@ const state = {
   records: [],
   directions: new Set(["CCW", "CW", "INNER"]),
   rows: new Set(Array.from({ length: 26 }, (_, index) => String(index + 1).padStart(2, "0"))),
+  installedOnly: false,
   search: "",
   sortColumn: "plan_no",
   sortDirection: "asc",
@@ -243,6 +244,9 @@ function createFilterButton(value, label, type) {
 function buildFilters() {
   const directionContainer = document.querySelector("#direction-options");
   Object.entries(directionLabels).forEach(([value, label]) => directionContainer.append(createFilterButton(value, label, "direction")));
+  const installedButton = createFilterButton("installed", "INSTALLED", "installed");
+  installedButton.setAttribute("aria-pressed", "false");
+  directionContainer.append(installedButton);
 
   const rowContainer = document.querySelector("#row-options");
   for (let row = 1; row <= 26; row += 1) {
@@ -252,6 +256,12 @@ function buildFilters() {
 }
 
 function toggleFilter(button) {
+  if (button.dataset.type === "installed") {
+    state.installedOnly = !state.installedOnly;
+    button.setAttribute("aria-pressed", String(state.installedOnly));
+    render();
+    return;
+  }
   const selection = button.dataset.type === "direction" ? state.directions : state.rows;
   selection.has(button.dataset.value) ? selection.delete(button.dataset.value) : selection.add(button.dataset.value);
   button.setAttribute("aria-pressed", String(selection.has(button.dataset.value)));
@@ -272,8 +282,12 @@ function filteredRecords() {
   const query = state.search.trim().toLowerCase();
   const records = state.records.filter((record) => {
     const haystack = `${record.plan_no} ${record.position}`.toLowerCase();
+    const hasInstalledStage = ["2000_mm", "1500_mm", "1000_mm"].some(
+      (stage) => (Number(record.progress?.[stage]) || 0) > 0 && record.completion?.[stage]?.done === true,
+    );
     return state.directions.has(record.region)
       && state.rows.has(String(record.row).padStart(2, "0"))
+      && (!state.installedOnly || hasInstalledStage)
       && (!query || haystack.includes(query));
   });
   const definition = columnByKey.get(state.sortColumn);
@@ -298,11 +312,20 @@ function escapeHtml(value) {
   return element.innerHTML;
 }
 
-function completionControls(record, stage) {
+function stageControlsMarkup(record, stage) {
+  const quantity = Number(record.progress?.[stage]) || 0;
+  if (quantity <= 0) {
+    return `
+      <td class="number inactive-stage-cell">${valueOrDash(record.progress?.[stage])}</td>
+      <td class="completion-cell inactive-stage-cell" aria-label="No ${stage.replace("_", " ")} X-bars required"></td>
+      <td class="date-cell inactive-stage-cell" aria-label="No completion date required"></td>`;
+  }
+
   const completion = record.completion?.[stage] || { done: false, date: null };
   const checked = completion.done ? " checked" : "";
   const disabled = completion.done ? "" : " disabled";
   return `
+    <td class="number">${valueOrDash(quantity)}</td>
     <td class="completion-cell">
       <input class="done-checkbox" type="checkbox" data-id="${escapeHtml(record.id)}" data-stage="${stage}" aria-label="Mark ${stage.replace("_", " ")} done for plan ${escapeHtml(record.plan_no)}"${checked}>
     </td>
@@ -339,12 +362,9 @@ function renderTable(records) {
       <td class="number">${valueOrDash(record.xbar_coverage_size)}</td>
       <td class="number">${valueOrDash(record.pixels)}</td>
       <td class="number">${valueOrDash(record.actual_length)}</td>
-      <td class="number">${valueOrDash(record.progress?.["2000_mm"])}</td>
-      ${completionControls(record, "2000_mm")}
-      <td class="number">${valueOrDash(record.progress?.["1500_mm"])}</td>
-      ${completionControls(record, "1500_mm")}
-      <td class="number">${valueOrDash(record.progress?.["1000_mm"])}</td>
-      ${completionControls(record, "1000_mm")}
+      ${stageControlsMarkup(record, "2000_mm")}
+      ${stageControlsMarkup(record, "1500_mm")}
+      ${stageControlsMarkup(record, "1000_mm")}
       <td class="number">${valueOrDash(record.cutting_length)}</td>
       ${detailControls(record)}`;
     [...row.cells].forEach((cell, index) => {
@@ -528,6 +548,19 @@ function bindControls() {
     state.search = event.target.value;
     render();
   });
+  document.querySelector("#controls-toggle").addEventListener("click", toggleRegisterControls);
+}
+
+function setRegisterControlsCollapsed(collapsed) {
+  document.body.classList.toggle("register-collapsed", collapsed);
+  const button = document.querySelector("#controls-toggle");
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.querySelector("span").textContent = collapsed ? "Roll down" : "Roll up";
+  localStorage.setItem("register-controls-collapsed", String(collapsed));
+}
+
+function toggleRegisterControls() {
+  setRegisterControlsCollapsed(!document.body.classList.contains("register-collapsed"));
 }
 
 loadTablePreferences();
@@ -535,4 +568,5 @@ buildFilters();
 bindControls();
 setupTableColumns();
 lucide.createIcons();
+setRegisterControlsCollapsed(localStorage.getItem("register-controls-collapsed") === "true");
 loadData();

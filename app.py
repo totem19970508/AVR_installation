@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import date
-from functools import lru_cache
 import hmac
 import os
 import re
@@ -52,7 +51,6 @@ def _plan_sort_key(record: dict[str, Any]) -> tuple[int, str]:
     return (int(plan_no), plan_no) if plan_no.isdigit() else (10**9, plan_no)
 
 
-@lru_cache(maxsize=1)
 def load_installations() -> tuple[dict[str, Any], ...]:
     documents = get_firestore_client().collection(COLLECTION_NAME).stream()
     records = ({"id": document.id, **document.to_dict()} for document in documents)
@@ -108,7 +106,6 @@ def update_completion(document_id: str, stage: str) -> Any:
 
     completion = {"done": done, "date": completion_date}
     document.update({f"completion.{stage}": completion})
-    load_installations.cache_clear()
     return jsonify({"id": document_id, "stage": stage, **completion})
 
 
@@ -146,7 +143,6 @@ def update_details(document_id: str) -> Any:
         return jsonify({"error": "Installation not found"}), 404
 
     document.update(updates)
-    load_installations.cache_clear()
     return jsonify({"id": document_id, **updates})
 
 

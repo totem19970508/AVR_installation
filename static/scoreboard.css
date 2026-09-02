@@ -19,6 +19,7 @@
 .schedule-controls input { width: 142px; min-height: 34px; padding: 5px 8px; color: #17211d; background: #fff; border: 1px solid #a8bdd0; border-radius: 3px; }
 .schedule-controls label:last-child input { width: 94px; text-align: center; }
 .schedule-controls input:focus { border-color: #ef9c51; outline: 2px solid rgba(239, 156, 81, .3); }
+.schedule-controls input[readonly] { color: #222; background: #e5e5e5; border-color: #888; cursor: default; }
 
 .analytics-grid { display: grid; grid-template-columns: minmax(350px, .72fr) minmax(560px, 1.45fr); gap: 22px; align-items: start; }
 .scoreboard-column { display: grid; gap: 22px; }

@@ -29,15 +29,21 @@ function formatDate(date) {
 }
 
 function loadSettings() {
-  const projectStart = document.querySelector("#project-start");
   const plannedDays = document.querySelector("#planned-days");
-  projectStart.value = localStorage.getItem("scoreboard-project-start") || localIsoDate();
+  localStorage.removeItem("scoreboard-project-start");
   plannedDays.value = localStorage.getItem("scoreboard-planned-days") || "50";
 }
 
 function saveSettings() {
-  localStorage.setItem("scoreboard-project-start", document.querySelector("#project-start").value);
   localStorage.setItem("scoreboard-planned-days", document.querySelector("#planned-days").value);
+}
+
+function earliestInstallationDate() {
+  const dates = records.flatMap((record) => stages
+    .map(({ key }) => record.completion?.[key])
+    .filter((completion) => completion?.done && completion.date)
+    .map((completion) => completion.date));
+  return dates.length ? dates.sort()[0] : localIsoDate();
 }
 
 function stageQuantity(record, stage) {
@@ -190,6 +196,7 @@ async function loadData() {
     if (!response.ok) throw new Error(`Request failed: ${response.status}`);
     const payload = await response.json();
     records = payload.records;
+    document.querySelector("#project-start").value = earliestInstallationDate();
     status.classList.add("ready");
     status.innerHTML = `<span class="status-dot" aria-hidden="true"></span>${payload.count} Firestore records ready`;
     render();
@@ -201,9 +208,9 @@ async function loadData() {
 }
 
 loadSettings();
-document.querySelectorAll("#project-start, #planned-days").forEach((input) => input.addEventListener("change", () => {
+document.querySelector("#planned-days").addEventListener("change", () => {
   saveSettings();
   render();
-}));
+});
 lucide.createIcons();
 loadData();
