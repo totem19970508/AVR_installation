@@ -1,26 +1,42 @@
 from __future__ import annotations
 
 from datetime import date
+import hashlib
 import hmac
 import os
 import re
+from threading import RLock
+from time import monotonic
 from typing import Any
 
-from flask import Flask, Response, jsonify, render_template, request
+from flask import Flask, Response, jsonify, redirect, render_template, request, session, url_for
+from google.api_core.exceptions import ResourceExhausted
 
 from src.firebase_client import get_firestore_client
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY") or hashlib.sha256(
+    f"avr-installation:{os.getenv('APP_PASSWORD', 'local-development')}".encode()
+).hexdigest()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=bool(os.getenv("RENDER")),
+)
 COLLECTION_NAME = "skylight_installation"
 STAGES = {"2000_mm", "1500_mm", "1000_mm"}
 DOCUMENT_ID_PATTERN = re.compile(r"installation-[0-9]+")
 MAX_INT64 = 2**63 - 1
 MAX_REMARKS_LENGTH = 1000
+CACHE_TTL_SECONDS = 3600
+_installation_cache: tuple[dict[str, Any], ...] | None = None
+_cache_loaded_at = 0.0
+_cache_lock = RLock()
 
 
 @app.before_request
 def require_production_login() -> Response | None:
-    if request.endpoint in {"health", "static"}:
+    if request.endpoint in {"health", "static", "login"}:
         return None
 
     expected_password = os.getenv("APP_PASSWORD")
@@ -29,14 +45,7 @@ def require_production_login() -> Response | None:
             return Response("APP_PASSWORD is not configured", status=503)
         return None
 
-    expected_username = os.getenv("APP_USERNAME", "Eddie C")
-    authorization = request.authorization
-    valid = (
-        authorization is not None
-        and hmac.compare_digest(authorization.username or "", expected_username)
-        and hmac.compare_digest(authorization.password or "", expected_password)
-    )
-    if valid:
+    if session.get("authenticated") is True:
         return None
 
     if request.path.startswith("/api/"):
@@ -44,14 +53,44 @@ def require_production_login() -> Response | None:
             {"error": "Login expired. Reload the page and sign in again."}
         )
         response.status_code = 401
-        response.headers["WWW-Authenticate"] = 'Basic realm="AVR Installation"'
         return response
 
-    return Response(
-        "Authentication required",
-        status=401,
-        headers={"WWW-Authenticate": 'Basic realm="AVR Installation"'},
+    return redirect(url_for("login", next=request.full_path))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login() -> str | Response:
+    error = None
+    if request.method == "POST":
+        expected_username = os.getenv("APP_USERNAME", "Eddie C")
+        expected_password = os.getenv("APP_PASSWORD", "")
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        if (
+            expected_password
+            and hmac.compare_digest(username, expected_username)
+            and hmac.compare_digest(password, expected_password)
+        ):
+            session.clear()
+            session["authenticated"] = True
+            destination = request.form.get("next", "/")
+            if not destination.startswith("/") or destination.startswith("//"):
+                destination = "/"
+            return redirect(destination)
+        error = "Incorrect username or password."
+
+    return render_template(
+        "login.html",
+        error=error,
+        username=os.getenv("APP_USERNAME", "Eddie C"),
+        next_url=request.args.get("next", "/"),
     )
+
+
+@app.post("/logout")
+def logout() -> Response:
+    session.clear()
+    return redirect(url_for("login"))
 
 
 def _plan_sort_key(record: dict[str, Any]) -> tuple[int, str]:
@@ -60,9 +99,44 @@ def _plan_sort_key(record: dict[str, Any]) -> tuple[int, str]:
 
 
 def load_installations() -> tuple[dict[str, Any], ...]:
-    documents = get_firestore_client().collection(COLLECTION_NAME).stream()
-    records = ({"id": document.id, **document.to_dict()} for document in documents)
-    return tuple(sorted(records, key=_plan_sort_key))
+    global _cache_loaded_at, _installation_cache
+
+    with _cache_lock:
+        if (
+            _installation_cache is not None
+            and monotonic() - _cache_loaded_at < CACHE_TTL_SECONDS
+        ):
+            return _installation_cache
+
+        documents = get_firestore_client().collection(COLLECTION_NAME).stream()
+        records = (
+            {"id": document.id, **document.to_dict()} for document in documents
+        )
+        _installation_cache = tuple(sorted(records, key=_plan_sort_key))
+        _cache_loaded_at = monotonic()
+        return _installation_cache
+
+
+def update_cached_installation(document_id: str, updates: dict[str, Any]) -> None:
+    with _cache_lock:
+        if _installation_cache is None:
+            return
+        for record in _installation_cache:
+            if record["id"] == document_id:
+                record.update(updates)
+                return
+
+
+def update_cached_completion(
+    document_id: str, stage: str, completion: dict[str, Any]
+) -> None:
+    with _cache_lock:
+        if _installation_cache is None:
+            return
+        for record in _installation_cache:
+            if record["id"] == document_id:
+                record.setdefault("completion", {})[stage] = completion
+                return
 
 
 @app.get("/")
@@ -82,7 +156,17 @@ def health() -> Any:
 
 @app.get("/api/installations")
 def installations() -> Any:
-    records = load_installations()
+    try:
+        records = load_installations()
+    except ResourceExhausted:
+        return jsonify(
+            {
+                "error": (
+                    "Firebase read quota is temporarily exhausted. "
+                    "Please try again after the daily quota resets."
+                )
+            }
+        ), 503
     return jsonify({"count": len(records), "records": records})
 
 
@@ -114,6 +198,7 @@ def update_completion(document_id: str, stage: str) -> Any:
 
     completion = {"done": done, "date": completion_date}
     document.update({f"completion.{stage}": completion})
+    update_cached_completion(document_id, stage, completion)
     return jsonify({"id": document_id, "stage": stage, **completion})
 
 
@@ -151,6 +236,7 @@ def update_details(document_id: str) -> Any:
         return jsonify({"error": "Installation not found"}), 404
 
     document.update(updates)
+    update_cached_installation(document_id, updates)
     return jsonify({"id": document_id, **updates})
 
 

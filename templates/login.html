@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in · AVR Installation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-panel" aria-labelledby="login-title">
+        <img class="login-logo" src="{{ url_for('static', filename='company-logo.png') }}" alt="Company logo" width="68" height="68">
+        <p class="eyebrow">Saudi Site Visit</p>
+        <h1 id="login-title">AVR Installation</h1>
+        <p class="login-intro">Sign in to update installation records.</p>
+        {% if error %}<p class="login-error" role="alert">{{ error }}</p>{% endif %}
+        <form class="login-form" method="post">
+          <input type="hidden" name="next" value="{{ next_url }}">
+          <label>Username<input name="username" type="text" value="{{ username }}" autocomplete="username" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" autofocus required></label>
+          <button type="submit">Sign in</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+.login-page { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: #eee; }
+.login-shell { width: min(420px, 100%); }
+.login-panel { padding: 28px; background: #fff; border: 1px solid #555; border-top: 5px solid #005a9c; }
+.login-logo { width: 68px; height: 68px; object-fit: contain; background: #172433; }
+.login-panel .eyebrow { margin: 16px 0 4px; color: #555; }
+.login-panel h1 { color: #172433; font-size: 36px; }
+.login-intro { margin-bottom: 20px; color: #555; }
+.login-error { padding: 10px; color: #7a1717; background: #f7dddd; border: 1px solid #ad5555; font-size: 13px; }
+.login-form { display: grid; gap: 14px; }
+.login-form label { display: grid; gap: 5px; color: #222; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+.login-form input { min-height: 42px; padding: 8px 10px; color: #111; background: #fff; border: 1px solid #555; border-radius: 2px; font-size: 15px; }
+.login-form input:focus { border-color: #005a9c; outline: 2px solid #9ac7e6; }
+.login-form button { min-height: 44px; color: #fff; background: #19713f; border: 1px solid #10542d; border-radius: 2px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.login-form button:hover, .login-form button:focus-visible { background: #10542d; outline: 2px solid #777; outline-offset: 2px; }
