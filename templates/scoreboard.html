@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Skylight installation performance scoreboard">
+    <title>Skylight Installation Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='scoreboard.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Saudi Site Visit</p>
+        <h1>Installation Scoreboard</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="user-credential" aria-label="Current user Eddie C">
+          <span class="user-avatar" aria-hidden="true">EC</span>
+          <span><small>User</small><strong>Eddie C</strong></span>
+        </div>
+        <div class="visit-counter" aria-label="Visit count">
+          <i data-lucide="eye" aria-hidden="true"></i>
+          <span><small>Visit</small><strong id="visit-count">0</strong></span>
+        </div>
+        <nav class="page-nav" aria-label="Primary navigation">
+          <a class="nav-link" href="/"><i data-lucide="table-2" aria-hidden="true"></i>Register</a>
+          <a class="nav-link active" href="/scoreboard" aria-current="page"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Scoreboard</a>
+        </nav>
+        <div class="data-status" id="data-status" role="status">
+          <span class="status-dot" aria-hidden="true"></span>
+          Connecting to Firestore
+        </div>
+      </div>
+    </header>
+
+    <main class="scoreboard-main">
+      <section class="score-strip" aria-label="Installation stage totals">
+        <article class="stage-score installation-score">
+          <header><span>Installations</span></header>
+          <div><strong id="installation-count">0</strong></div>
+        </article>
+        <article class="stage-score stage-score-2000">
+          <header><span>2M Planned</span><span>Installed</span></header>
+          <div><strong id="planned-2000">0</strong><strong id="done-2000">0</strong></div>
+        </article>
+        <article class="stage-score stage-score-1500">
+          <header><span>1.5M Planned</span><span>Installed</span></header>
+          <div><strong id="planned-1500">0</strong><strong id="done-1500">0</strong></div>
+        </article>
+        <article class="stage-score stage-score-1000">
+          <header><span>1M Planned</span><span>Installed</span></header>
+          <div><strong id="planned-1000">0</strong><strong id="done-1000">0</strong></div>
+        </article>
+        <article class="stage-score total-score">
+          <header><span>Total X-bars</span></header>
+          <div><strong id="total-planned">0</strong></div>
+        </article>
+        <article class="stage-score done-score">
+          <header><span>Total installed</span></header>
+          <div><strong id="total-done">0</strong></div>
+        </article>
+      </section>
+
+      <section class="scoreboard-title-band">
+        <div>
+          <span class="scoreboard-kicker">Live Firebase view</span>
+          <h2>Skylight Installation Performance</h2>
+        </div>
+        <div class="schedule-controls" aria-label="Project schedule settings">
+          <label>Project start<input id="project-start" type="date"></label>
+          <label>Planned days<input id="planned-days" type="number" min="1" max="365" step="1" value="50"></label>
+        </div>
+      </section>
+
+      <section class="analytics-grid">
+        <div class="scoreboard-column">
+          <section class="kpi-panel" aria-labelledby="kpi-heading">
+            <header class="panel-heading"><span>01</span><h2 id="kpi-heading">KPI</h2></header>
+            <dl class="kpi-list">
+              <div><dt>Estimated job duration</dt><dd id="kpi-planned-days">50 days</dd></div>
+              <div><dt>Days elapsed</dt><dd id="kpi-days-elapsed">0</dd></div>
+              <div><dt>Days remaining</dt><dd id="kpi-days-remaining">50</dd></div>
+              <div><dt>Time used</dt><dd id="kpi-time-used">0%</dd></div>
+              <div><dt>Required X-bars / day</dt><dd id="kpi-target">0</dd></div>
+              <div><dt>Total X-bars</dt><dd id="kpi-total">0</dd></div>
+              <div><dt>X-bars installed</dt><dd id="kpi-installed">0</dd></div>
+              <div><dt>Percentage complete</dt><dd id="kpi-complete">0%</dd></div>
+              <div><dt>Health</dt><dd><span class="health-badge" id="kpi-health">Waiting</span></dd></div>
+            </dl>
+          </section>
+
+          <section class="daily-panel" aria-labelledby="daily-heading">
+            <header class="panel-heading"><span>02</span><h2 id="daily-heading">Daily X-Bar Installation</h2></header>
+            <div class="daily-table-shell">
+              <table class="daily-table">
+                <thead><tr><th>Date</th><th>X-bars installed</th></tr></thead>
+                <tbody id="daily-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section class="chart-panel" aria-labelledby="chart-heading">
+          <header class="panel-heading">
+            <span>03</span>
+            <div><h2 id="chart-heading">X-Bars Installed per Day</h2><p id="chart-range">Loading schedule...</p></div>
+          </header>
+          <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='header.js') }}"></script>
+    <script src="{{ url_for('static', filename='scoreboard.js') }}"></script>
+  </body>
+</html>

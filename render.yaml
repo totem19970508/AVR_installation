@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: avr-installation
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 2 --threads 4 --timeout 120 app:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false

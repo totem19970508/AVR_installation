@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Skylight installation performance dashboard">
+    <title>Skylight Installation Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Saudi Site Visit</p>
+        <h1>Skylight Installation Control</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="user-credential" aria-label="Current user Eddie C">
+          <span class="user-avatar" aria-hidden="true">EC</span>
+          <span><small>User</small><strong>Eddie C</strong></span>
+        </div>
+        <div class="visit-counter" aria-label="Visit count">
+          <i data-lucide="eye" aria-hidden="true"></i>
+          <span><small>Visit</small><strong id="visit-count">0</strong></span>
+        </div>
+        <nav class="page-nav" aria-label="Primary navigation">
+          <a class="nav-link active" href="/" aria-current="page"><i data-lucide="table-2" aria-hidden="true"></i>Register</a>
+          <a class="nav-link" href="/scoreboard"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Scoreboard</a>
+        </nav>
+        <div class="data-status" id="data-status" role="status">
+          <span class="status-dot" aria-hidden="true"></span>
+          Connecting to Firestore
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="filter-band" aria-label="Installation filters">
+        <div class="filter-group direction-filter">
+          <div class="filter-heading">
+            <div class="heading-label"><span>01</span><h2>Direction</h2></div>
+            <div class="icon-actions">
+              <button class="icon-button" id="direction-all" type="button" title="Select all directions" aria-label="Select all directions"><i data-lucide="list-checks"></i></button>
+              <button class="deselect-button" id="direction-clear" type="button"><i data-lucide="filter-x" aria-hidden="true"></i><span>Deselect all</span></button>
+            </div>
+          </div>
+          <div class="direction-options" id="direction-options" aria-label="Direction multi-select"></div>
+        </div>
+
+        <div class="filter-group row-filter">
+          <div class="filter-heading">
+            <div class="heading-label"><span>02</span><h2>Row #</h2></div>
+            <div class="icon-actions">
+              <button class="icon-button" id="row-all" type="button" title="Select all rows" aria-label="Select all rows"><i data-lucide="list-checks"></i></button>
+              <button class="deselect-button" id="row-clear" type="button"><i data-lucide="filter-x" aria-hidden="true"></i><span>Deselect all</span></button>
+            </div>
+          </div>
+          <div class="row-options" id="row-options" aria-label="Row multi-select"></div>
+        </div>
+      </section>
+
+      <section class="summary-band" aria-label="Filtered installation summary">
+        <div class="metric metric-2000">
+          <span>2000 mm X-bars</span>
+          <div class="metric-equation"><b id="metric-2000-total">0</b><small>Total</small><i>−</i><b id="metric-2000-installed">0</b><small>Installed</small><i>=</i><b id="metric-2000-remaining">0</b><small>Remaining</small></div>
+        </div>
+        <div class="metric metric-1500">
+          <span>1500 mm X-bars</span>
+          <div class="metric-equation"><b id="metric-1500-total">0</b><small>Total</small><i>−</i><b id="metric-1500-installed">0</b><small>Installed</small><i>=</i><b id="metric-1500-remaining">0</b><small>Remaining</small></div>
+        </div>
+        <div class="metric metric-1000">
+          <span>1000 mm X-bars</span>
+          <div class="metric-equation"><b id="metric-1000-total">0</b><small>Total</small><i>−</i><b id="metric-1000-installed">0</b><small>Installed</small><i>=</i><b id="metric-1000-remaining">0</b><small>Remaining</small></div>
+        </div>
+        <div class="metric metric-total">
+          <span>All X-bars</span>
+          <div class="metric-equation"><b id="metric-total-total">0</b><small>Total</small><i>−</i><b id="metric-total-installed">0</b><small>Installed</small><i>=</i><b id="metric-total-remaining">0</b><small>Remaining</small></div>
+        </div>
+      </section>
+
+      <section class="results-section">
+        <div class="results-heading">
+          <div>
+            <div class="heading-label"><span>03</span><h2>Installation Register</h2></div>
+            <p id="result-count">Loading records...</p>
+          </div>
+          <label class="search-field">
+            <i data-lucide="search" aria-hidden="true"></i>
+            <span class="sr-only">Search plan number or position</span>
+            <input id="search-input" type="search" placeholder="Search plan or position" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Plan No</th><th>Direction</th><th>Row</th><th>Position</th>
+                <th class="number">Measured</th><th class="number">Coverage</th>
+                <th class="number">Pixels</th><th class="number">Actual length</th>
+                <th class="number">2000 mm</th><th>Done</th><th>Date</th>
+                <th class="number">1500 mm</th><th>Done</th><th>Date</th>
+                <th class="number">1000 mm</th><th>Done</th><th>Date</th>
+                <th class="number">Cutting</th><th>Actual Cut</th><th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="installation-body"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <i data-lucide="search-x" aria-hidden="true"></i>
+            <h3>No matching installations</h3>
+            <p>Adjust the direction, row, or search filters.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="{{ url_for('static', filename='header.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
