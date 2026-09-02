@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from datetime import date
 from functools import lru_cache
+import hmac
+import os
 import re
 from typing import Any
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 
 from src.firebase_client import get_firestore_client
 
@@ -15,6 +17,34 @@ STAGES = {"2000_mm", "1500_mm", "1000_mm"}
 DOCUMENT_ID_PATTERN = re.compile(r"installation-[0-9]+")
 MAX_INT64 = 2**63 - 1
 MAX_REMARKS_LENGTH = 1000
+
+
+@app.before_request
+def require_production_login() -> Response | None:
+    if request.endpoint in {"health", "static"}:
+        return None
+
+    expected_password = os.getenv("APP_PASSWORD")
+    if not expected_password:
+        if os.getenv("RENDER"):
+            return Response("APP_PASSWORD is not configured", status=503)
+        return None
+
+    expected_username = os.getenv("APP_USERNAME", "Eddie C")
+    authorization = request.authorization
+    valid = (
+        authorization is not None
+        and hmac.compare_digest(authorization.username or "", expected_username)
+        and hmac.compare_digest(authorization.password or "", expected_password)
+    )
+    if valid:
+        return None
+
+    return Response(
+        "Authentication required",
+        status=401,
+        headers={"WWW-Authenticate": 'Basic realm="AVR Installation"'},
+    )
 
 
 def _plan_sort_key(record: dict[str, Any]) -> tuple[int, str]:

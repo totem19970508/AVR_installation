@@ -21,4 +21,8 @@ Render service settings, set `FIREBASE_SERVICE_ACCOUNT_JSON` to the complete
 contents of the Firebase service-account JSON file. Never commit that JSON file
 or paste it into source code.
 
+Set `APP_PASSWORD` to a strong private password. The deployment username is
+`Eddie C`. Render will refuse application requests if the production password
+is missing. Local development remains available without a password.
+
 The health check endpoint is `/health`.

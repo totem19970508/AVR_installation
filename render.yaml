@@ -11,3 +11,7 @@ services:
         value: 3.11.11
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
+      - key: APP_USERNAME
+        value: Eddie C
+      - key: APP_PASSWORD
+        sync: false
