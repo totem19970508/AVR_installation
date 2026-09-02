@@ -39,6 +39,14 @@ def require_production_login() -> Response | None:
     if valid:
         return None
 
+    if request.path.startswith("/api/"):
+        response = jsonify(
+            {"error": "Login expired. Reload the page and sign in again."}
+        )
+        response.status_code = 401
+        response.headers["WWW-Authenticate"] = 'Basic realm="AVR Installation"'
+        return response
+
     return Response(
         "Authentication required",
         status=401,

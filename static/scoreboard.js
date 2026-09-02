@@ -193,8 +193,7 @@ async function loadData() {
   const status = document.querySelector("#data-status");
   try {
     const response = await fetch("/api/installations");
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    const payload = await response.json();
+    const payload = await window.readApiResponse(response, "Loading records failed");
     records = payload.records;
     document.querySelector("#project-start").value = earliestInstallationDate();
     status.classList.add("ready");

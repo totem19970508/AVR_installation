@@ -408,10 +408,7 @@ async function saveCompletion(documentId, stage, done, date, controls) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ done, date }),
     });
-    if (!response.ok) {
-      const payload = await response.json();
-      throw new Error(payload.error || `Save failed: ${response.status}`);
-    }
+    await window.readApiResponse(response, "Save failed");
     setCompletion(findRecord(documentId), stage, done, date);
   } catch (error) {
     alert(error.message);
@@ -471,10 +468,7 @@ async function handleDetailChange(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ [field]: value }),
     });
-    if (!response.ok) {
-      const payload = await response.json();
-      throw new Error(payload.error || `Save failed: ${response.status}`);
-    }
+    await window.readApiResponse(response, "Save failed");
     findRecord(control.dataset.id)[field] = value;
     control.classList.add("saved");
     setTimeout(() => control.classList.remove("saved"), 700);
@@ -526,8 +520,7 @@ async function loadData() {
   const status = document.querySelector("#data-status");
   try {
     const response = await fetch("/api/installations");
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-    const payload = await response.json();
+    const payload = await window.readApiResponse(response, "Loading records failed");
     state.records = payload.records;
     status.classList.add("ready");
     status.innerHTML = `<span class="status-dot" aria-hidden="true"></span>${payload.count} Firestore records ready`;
