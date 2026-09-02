@@ -51,6 +51,25 @@
 .chart-panel { min-height: 570px; }
 .chart-wrap { position: relative; height: 510px; padding: 20px 18px 14px; }
 
+@media (min-width: 1200px) and (min-height: 700px) {
+  .scoreboard-main { width: 100%; max-width: 1920px; padding: 18px 28px 13px; }
+  .score-strip { gap: 10px; margin-bottom: 14px; }
+  .stage-score header { min-height: 32px; padding: 6px 10px; }
+  .stage-score > div { min-height: 52px; padding: 9px 11px; }
+  .stage-score strong { font-size: 29px; }
+  .scoreboard-title-band { min-height: 60px; margin-bottom: 14px; padding: 10px 16px; }
+  .scoreboard-title-band h2 { font-size: 24px; }
+  .analytics-grid, .scoreboard-column { gap: 14px; }
+  .analytics-grid { grid-template-columns: minmax(560px, 1fr) minmax(560px, 1fr); }
+  .scoreboard-column { grid-template-columns: 1fr 1fr; }
+  .panel-heading { min-height: 40px; padding: 8px 12px; }
+  .kpi-list > div { min-height: 32px; padding: 5px 10px; }
+  .daily-table-shell { height: calc(100vh - 342px); min-height: 260px; max-height: none; }
+  .daily-table td { padding: 6px 10px; }
+  .chart-panel { min-height: calc(100vh - 310px); }
+  .chart-wrap { height: calc(100vh - 360px); min-height: 320px; padding: 14px 14px 10px; }
+}
+
 @media (max-width: 1050px) {
   .score-strip { grid-template-columns: repeat(3, 1fr); }
   .analytics-grid { grid-template-columns: 1fr; }
