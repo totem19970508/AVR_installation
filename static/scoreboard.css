@@ -1,21 +1,17 @@
 .scoreboard-main { width: min(1500px, 100%); padding: 26px clamp(20px, 4vw, 64px) 56px; }
 .score-strip { display: grid; grid-template-columns: repeat(4, minmax(145px, 1fr)) repeat(2, minmax(125px, .78fr)); gap: 12px; margin-bottom: 22px; }
-.stage-score { min-width: 0; background: rgba(255, 255, 255, .94); border: 1px solid #b9c7bd; box-shadow: 0 7px 20px rgba(44, 71, 55, .07); }
+.stage-score { min-width: 0; background: #fff; border: 1px solid #777; box-shadow: none; }
 .stage-score header { min-height: 37px; padding: 8px 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; color: #fff; background: #59655f; font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; }
 .stage-score > div { min-height: 64px; padding: 12px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
 .stage-score strong { overflow: hidden; font-family: "Barlow Condensed", sans-serif; font-size: 32px; line-height: 1; text-overflow: ellipsis; }
-.stage-score > div strong:last-child { color: #21523d; }
-.stage-score-2000 { border-top: 4px solid #2f6785; }
-.stage-score-1500 { border-top: 4px solid #a17f30; }
-.stage-score-1000 { border-top: 4px solid #42704e; }
-.stage-score-2000 > div strong:first-child { color: #2f6785; }
-.stage-score-1500 > div strong:first-child { color: #806523; }
-.stage-score-1000 > div strong:first-child { color: #42704e; }
+.stage-score > div strong:last-child { color: #19713f; }
+.stage-score-2000, .stage-score-1500, .stage-score-1000 { border-top: 4px solid #005a9c; }
+.stage-score-2000 > div strong:first-child, .stage-score-1500 > div strong:first-child, .stage-score-1000 > div strong:first-child { color: #111; }
 .installation-score, .total-score, .done-score { border-top: 4px solid #17211d; }
 .installation-score header, .total-score header, .done-score header { grid-template-columns: 1fr; text-align: center; }
 .installation-score > div, .total-score > div, .done-score > div { grid-template-columns: 1fr; text-align: center; }
 
-.scoreboard-title-band { min-height: 74px; margin-bottom: 22px; padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 22px; color: #fff; background: #1d4168; border-left: 5px solid #ef9c51; }
+.scoreboard-title-band { min-height: 74px; margin-bottom: 22px; padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 22px; color: #fff; background: #173a5e; border-left: 5px solid #005a9c; }
 .scoreboard-title-band h2 { margin: 0; font-size: 27px; }
 .scoreboard-kicker { display: block; margin-bottom: 3px; color: #b8cee3; font-size: 11px; font-weight: 600; text-transform: uppercase; }
 .schedule-controls { display: flex; align-items: flex-end; gap: 10px; }
@@ -26,7 +22,7 @@
 
 .analytics-grid { display: grid; grid-template-columns: minmax(350px, .72fr) minmax(560px, 1.45fr); gap: 22px; align-items: start; }
 .scoreboard-column { display: grid; gap: 22px; }
-.kpi-panel, .daily-panel, .chart-panel { min-width: 0; background: rgba(255, 255, 255, .95); border: 1px solid #b9c7bd; box-shadow: 0 9px 28px rgba(44, 71, 55, .09); }
+.kpi-panel, .daily-panel, .chart-panel { min-width: 0; background: #fff; border: 1px solid #777; box-shadow: none; }
 .panel-heading { min-height: 48px; padding: 11px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccd6cf; }
 .panel-heading > span { color: #ef9c51; font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700; }
 .panel-heading h2 { margin: 0; font-size: 23px; }
